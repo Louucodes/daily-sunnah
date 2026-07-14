@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><base href="https://d16ilfvy4mv02r.cloudfront.net/workspaces/2ChxOejilXPoKFycTH58rREDL3mLHKEu/c7ca262c-8612-450f-ac12-14e947a75d32/files/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Daily Sunnah</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<style>
+  :root{
+    --green:#1f6f4a; --green-dark:#134d33; --green-soft:#e7f3ec;
+    --gold:#c8a24d; --gold-soft:#f3e9d2; --white:#ffffff;
+    --ink:#20291f; --muted:#6c7a70; --card-radius:20px;
+    --shadow:0 8px 24px rgba(31,111,74,0.10); --bg:#f6f9f6;
+    --transition:.25s cubic-bezier(.4,0,.2,1);
+  }
+  [data-theme="dark"]{
+    --green:#3fae7b; --green-dark:#0e2f20; --green-soft:#12241c;
+    --gold:#e0bd6c; --gold-soft:#2a2415; --white:#151b17;
+    --ink:#eef3ee; --muted:#9fb0a5; --bg:#0d120f;
+    --shadow:0 8px 24px rgba(0,0,0,0.4);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{font-family:'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; background:var(--bg); color:var(--ink); transition:background var(--transition), color var(--transition); overscroll-behavior-y: contain;}
+  #app{max-width:430px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; padding-bottom:86px;}
+  .header{background:linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%); color:#fff; padding:22px 20px 30px; border-radius:0 0 28px 28px; position:relative; overflow:hidden;}
+  .header::after{content:""; position:absolute; right:-40px; top:-40px; width:160px;height:160px;border-radius:50%; background:radial-gradient(circle, rgba(200,162,77,0.25), transparent 70%);}
+  .header-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .greeting{font-size:22px; font-weight:700; letter-spacing:.2px;}
+  .subgreeting{font-size:13px; opacity:.85; margin-top:4px;}
+  .dates{margin-top:14px; font-size:13px; opacity:.95; display:flex; gap:10px; flex-wrap:wrap;}
+  .date-pill{background:rgba(255,255,255,0.14); padding:6px 12px; border-radius:999px; backdrop-filter:blur(4px);}
+  .icon-btn{width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,0.16); display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; color:#fff; font-size:18px; transition:transform var(--transition), background var(--transition);}
+  .icon-btn:active{transform:scale(0.9); background:rgba(255,255,255,0.3);}
+  .header-actions{display:flex; gap:8px;}
+  .mini-progress{margin-top:18px; background:rgba(255,255,255,0.14); border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between;}
+  .mini-progress .txt{font-size:12.5px; opacity:.9;}
+  .mini-progress .num{font-size:20px; font-weight:800; color:var(--gold-soft);}
+  .progress-bar-track{height:6px; background:rgba(255,255,255,0.2); border-radius:6px; margin-top:8px; overflow:hidden;}
+  .progress-bar-fill{height:100%; background:var(--gold); border-radius:6px; transition:width .5s ease;}
+  .content{padding:18px 16px 8px;}
+  .section-title{font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin:18px 4px 10px;}
+  .card{background:var(--white); border-radius:var(--card-radius); box-shadow:var(--shadow); padding:18px; margin-bottom:16px; position:relative; overflow:hidden; animation:fadeUp .5s ease both; border:1px solid rgba(31,111,74,0.06);}
+  [data-theme="dark"] .card{ border:1px solid rgba(255,255,255,0.05); }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  .card-tag{display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--green); background:var(--green-soft); padding:5px 10px; border-radius:999px; margin-bottom:10px;}
+  .card-tag.gold{ color:#8a6d1f; background:var(--gold-soft); }
+  [data-theme="dark"] .card-tag.gold{ color:var(--gold); }
+  .card-title{font-size:18px; font-weight:800; margin:2px 0 6px; line-height:1.35;}
+  .card-body{font-size:14.5px; color:var(--ink); line-height:1.6; opacity:.92;}
+  .card-sub{font-size:13px; color:var(--muted); margin-top:8px; line-height:1.5;}
+  .ref{font-size:12px; color:var(--muted); margin-top:10px; font-style:italic; border-left:3px solid var(--gold); padding-left:8px;}
+  .arabic{font-family:'Traditional Arabic','Scheherazade New', serif; font-size:24px; line-height:2; text-align:right; direction:rtl; color:var(--green-dark); margin:10px 0; font-weight:600;}
+  [data-theme="dark"] .arabic{ color:var(--gold); }
+  .translit{font-size:13px; font-style:italic; color:var(--muted); margin-bottom:6px;}
+  .card-footer{display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding-top:12px; border-top:1px solid rgba(0,0,0,0.06);}
+  [data-theme="dark"] .card-footer{ border-top:1px solid rgba(255,255,255,0.06); }
+  .action-row{display:flex; gap:8px;}
+  .action-btn{width:36px; height:36px; border-radius:50%; border:none; background:var(--green-soft); color:var(--green); display:flex; align-items:center; justify-content:center; font-size:15px; cursor:pointer; transition:all var(--transition);}
+  .action-btn.active{ background:var(--gold); color:#fff; }
+  .action-btn:active{ transform:scale(0.88); }
+  [data-theme="dark"] .action-btn{ background:#1b2b21; color:var(--green); }
+  .complete-btn{border:none; padding:9px 16px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; transition:all var(--transition); display:flex; align-items:center; gap:6px; background:var(--green-soft); color:var(--green);}
+  .complete-btn.done{ background:var(--green); color:#fff; }
+  .complete-btn:active{ transform:scale(0.95); }
+  .complete-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .meta-row{display:flex; gap:10px; font-size:12px; color:var(--muted); margin-top:8px; flex-wrap:wrap;}
+  .meta-chip{background:var(--bg); padding:4px 9px; border-radius:8px;}
+  .celebrate-overlay{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.35); z-index:999; opacity:0; pointer-events:none; transition:opacity .3s;}
+  .celebrate-overlay.show{opacity:1; pointer-events:all;}
+  .celebrate-box{background:var(--white); padding:30px 26px; border-radius:24px; text-align:center; max-width:280px; transform:scale(.8); transition:transform .35s cubic-bezier(.34,1.56,.64,1); box-shadow:0 20px 50px rgba(0,0,0,0.25);}
+  .celebrate-overlay.show .celebrate-box{transform:scale(1);}
+  .celebrate-emoji{font-size:52px; margin-bottom:10px; animation:pop .6s ease;}
+  @keyframes pop{0%{transform:scale(0);}60%{transform:scale(1.2);}100%{transform:scale(1);}}
+  .celebrate-title{font-size:18px; font-weight:800; color:var(--green);}
+  .celebrate-sub{font-size:13px; color:var(--muted); margin-top:6px;}
+  .bottom-nav{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:var(--white); box-shadow:0 -4px 20px rgba(0,0,0,0.08); display:flex; justify-content:space-around; padding:10px 6px 14px; border-radius:24px 24px 0 0; z-index:100;}
+  .nav-item{display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--muted); font-size:10.5px; cursor:pointer; background:none; border:none; padding:4px 10px; border-radius:12px; transition:all var(--transition);}
+  .nav-item.active{ color:var(--green); }
+  .nav-item .nav-icon{font-size:19px;}
+  .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--green-dark); color:#fff; padding:10px 18px; border-radius:999px; font-size:13px; opacity:0; transition:all .3s; z-index:200; pointer-events:none; box-shadow:0 8px 20px rgba(0,0,0,0.2); white-space:nowrap; max-width:90%; text-align:center;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .fade-in{animation:fadeUp .4s ease both;}
+  a{color:inherit;}
+  /* AUTH SCREEN */
+  #authScreen{position:fixed; inset:0; background:linear-gradient(180deg, var(--green-dark), var(--green)); z-index:500; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:32px; color:#fff;}
+  .auth-logo{font-size:48px; margin-bottom:10px;}
+  .auth-title{font-size:26px; font-weight:800; margin-bottom:4px;}
+  .auth-sub{font-size:13px; opacity:.85; margin-bottom:28px; text-align:center;}
+  .auth-box{width:100%; max-width:340px;}
+  .auth-input{width:100%; padding:13px 16px; border-radius:14px; border:none; margin-bottom:10px; font-size:14px; background:rgba(255,255,255,0.95); color:#111;}
+  .auth-btn{width:100%; padding:13px; border-radius:14px; border:none; font-size:14px; font-weight:700; cursor:pointer; margin-bottom:10px; transition:all var(--transition);}
+  .auth-btn.primary{background:var(--gold); color:#20291f;}
+  .auth-btn.secondary{background:rgba(255,255,255,0.15); color:#fff;}
+  .auth-btn:active{transform:scale(0.97);}
+  .auth-divider{text-align:center; font-size:12px; opacity:.7; margin:14px 0;}
+  .auth-link{text-align:center; font-size:13px; margin-top:12px; opacity:.9; cursor:pointer; text-decoration:underline;}
+  .auth-error{background:rgba(255,80,80,0.2); padding:8px 12px; border-radius:10px; font-size:12.5px; margin-bottom:10px; display:none;}
+  /* ADMIN CMS */
+  .admin-form input, .admin-form textarea{width:100%; padding:11px 13px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:10px; font-size:13.5px; background:var(--bg); color:var(--ink); font-family:inherit;}
+  .admin-form textarea{min-height:60px; resize:vertical;}
+  .admin-tabs{display:flex; gap:6px; overflow-x:auto; margin-bottom:14px; padding-bottom:4px;}
+  .admin-tab{padding:7px 14px; border-radius:999px; background:var(--green-soft); color:var(--green); font-size:12.5px; font-weight:700; white-space:nowrap; cursor:pointer; border:none;}
+  .admin-tab.active{background:var(--green); color:#fff;}
+  .sync-badge{font-size:10px; padding:3px 8px; border-radius:999px; background:rgba(255,255,255,0.15); display:inline-flex; align-items:center; gap:4px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:#4ade80;}
+  .dot.offline{background:#f87171;}
+</style>
+</head>
+<body data-theme="light">
+
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+  <div class="auth-logo">🕌</div>
+  <div class="auth-title">Daily Sunnah</div>
+  <div class="auth-sub">Two minutes each morning to strengthen<br>your connection with Islam</div>
+  <div class="auth-box">
+    <div class="auth-error" id="authError"></div>
+    <input class="auth-input" id="authEmail" type="email" placeholder="Email address">
+    <input class="auth-input" id="authPassword" type="password" placeholder="Password">
+    <button class="auth-btn primary" onclick="handleAuth('signin')">Sign In</button>
+    <button class="auth-btn secondary" onclick="handleAuth('signup')">Create Account</button>
+    <div class="auth-divider">— or —</div>
+    <button class="auth-btn secondary" onclick="signInWithProvider('google')">🔵 Continue with Google</button>
+    <button class="auth-btn secondary" onclick="signInWithProvider('apple')">⚫ Continue with Apple</button>
+    <div class="auth-link" onclick="continueAsGuest()">Continue as Guest →</div>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="greeting" id="greetingText">Assalamu Alaikum ☾</div>
+        <div class="subgreeting">Take two minutes for your heart today</div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+        <button class="icon-btn" onclick="showScreen('account', document.querySelector('.nav-item[data-tab=settings]'))" id="accountBtn">👤</button>
+      </div>
+    </div>
+    <div class="dates">
+      <div class="date-pill" id="gregDate">—</div>
+      <div class="date-pill" id="hijriDate">—</div>
+      <div class="date-pill sync-badge"><span class="dot" id="syncDot"></span><span id="syncText">Synced</span></div>
+    </div>
+    <div class="mini-progress">
+      <div>
+        <div class="txt">Today's Progress</div>
+        <div class="num" id="progressPct">0%</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="txt">🔥 Streak</div>
+        <div class="num" id="streakNum">0 days</div>
+      </div>
+    </div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="content" id="homeScreen">
+    <div class="section-title">Today's Sunnah</div>
+    <div class="card" id="cardSunnah"><div class="card-sub">Loading...</div></div>
+
+    <div class="section-title">Daily Hadith</div>
+    <div class="card" id="cardHadith"><div class="card-sub">Loading...</div></div>
+
+    <div class="section-title">Daily Dua</div>
+    <div class="card" id="cardDua"><div class="card-sub">Loading...</div></div>
+
+    <div class="section-title">Daily Quran Verse</div>
+    <div class="card" id="cardVerse"><div class="card-sub">Loading...</div></div>
+
+    <div class="section-title">Today's Challenge</div>
+    <div class="card" id="cardChallenge" style="background:linear-gradient(135deg, var(--gold-soft), var(--white));"><div class="card-sub">Loading...</div></div>
+  </div>
+
+  <div class="content" id="bookmarksScreen" style="display:none;">
+    <div class="section-title">Your Bookmarks</div>
+    <input id="bmSearch" oninput="renderBookmarks()" placeholder="Search bookmarks..." style="width:100%;padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,0.1);margin-bottom:14px;font-size:14px;background:var(--white);color:var(--ink);">
+    <div id="bookmarksList"></div>
+  </div>
+
+  <div class="content" id="progressScreen" style="display:none;">
+    <div class="section-title">Progress Dashboard</div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;text-align:center;">
+        <div><div class="card-title" id="statSunnah" style="font-size:22px;">0</div><div class="card-sub">Sunnahs</div></div>
+        <div><div class="card-title" id="statHadith" style="font-size:22px;">0</div><div class="card-sub">Hadiths</div></div>
+        <div><div class="card-title" id="statVerse" style="font-size:22px;">0</div><div class="card-sub">Verses</div></div>
+        <div><div class="card-title" id="statChallenge" style="font-size:22px;">0</div><div class="card-sub">Challenges</div></div>
+      </div>
+    </div>
+    <div class="section-title">Streak</div>
+    <div class="card">
+      <div class="card-body">Current streak: <strong id="curStreak">0</strong> days</div>
+      <div class="card-body">Longest streak: <strong id="longStreak">0</strong> days</div>
+      <div class="card-sub">Milestones: 7 · 30 · 100 · 365 days</div>
+    </div>
+    <div class="section-title">This Month</div>
+    <div class="card" id="calendarCard"></div>
+  </div>
+
+  <div class="content" id="settingsScreen" style="display:none;">
+    <div class="section-title">Settings</div>
+    <div class="card">
+      <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;">
+        Dark Mode <input type="checkbox" id="darkToggle" onchange="setTheme(this.checked)">
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">Daily reminder time</div>
+      <input type="time" id="reminderTime" value="06:00" onchange="updateNotificationTime(this.value)" style="margin-top:8px;padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);">
+    </div>
+    <div class="card" id="adminEntryCard" style="display:none;">
+      <button class="complete-btn" onclick="showScreen('admin', document.querySelector('.nav-item[data-tab=settings]'))">🛠️ Open Admin CMS</button>
+    </div>
+    <div class="card">
+      <button class="complete-btn" onclick="resetProgress()">Reset Progress</button>
+    </div>
+    <div class="card">
+      <button class="complete-btn" onclick="signOutUser()">Sign Out</button>
+    </div>
+    <div class="card card-sub">Daily Sunnah v1.1 — Content sourced from authentic collections (Sahih al-Bukhari, Sahih Muslim, Sunan al-Tirmidhi, Quran) with references cited. Cloud sync powered by Supabase.</div>
+  </div>
+
+  <!-- ACCOUNT MINI SCREEN -->
+  <div class="content" id="accountScreen" style="display:none;">
+    <div class="section-title">Account</div>
+    <div class="card">
+      <div class="card-title" style="font-size:16px;" id="acctEmail">—</div>
+      <div class="card-sub" id="acctStatus">—</div>
+    </div>
+    <div class="card">
+      <button class="complete-btn" onclick="showScreen('settings', document.querySelector('.nav-item[data-tab=settings]'))">⚙️ Go to Settings</button>
+    </div>
+  </div>
+
+  <!-- ADMIN CMS SCREEN -->
+  <div class="content" id="adminScreen" style="display:none;">
+    <div class="section-title">Admin CMS</div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('sunnahs', this)">Sunnahs</button>
+      <button class="admin-tab" onclick="switchAdminTab('hadiths', this)">Hadiths</button>
+      <button class="admin-tab" onclick="switchAdminTab('duas', this)">Duas</button>
+      <button class="admin-tab" onclick="switchAdminTab('quran_verses', this)">Verses</button>
+      <button class="admin-tab" onclick="switchAdminTab('challenges', this)">Challenges</button>
+    </div>
+    <div class="card admin-form" id="adminFormCard"></div>
+    <div class="section-title">Existing Entries</div>
+    <div id="adminList"></div>
+  </div>
+
+</div>
+
+<div class="celebrate-overlay" id="celebrateOverlay">
+  <div class="celebrate-box">
+    <div class="celebrate-emoji">🎉</div>
+    <div class="celebrate-title" id="celebrateTitle">MashaAllah!</div>
+    <div class="celebrate-sub" id="celebrateSub">You completed today's session.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="bottom-nav" id="bottomNav" style="display:none;">
+  <button class="nav-item active" data-tab="home" onclick="showScreen('home', this)"><span class="nav-icon">🏠</span>Home</button>
+  <button class="nav-item" data-tab="bookmarks" onclick="showScreen('bookmarks', this)"><span class="nav-icon">🔖</span>Saved</button>
+  <button class="nav-item" data-tab="progress" onclick="showScreen('progress', this)"><span class="nav-icon">📊</span>Progress</button>
+  <button class="nav-item" data-tab="settings" onclick="showScreen('settings', this)"><span class="nav-icon">⚙️</span>Settings</button>
+</div>
+
+<script>
+// ============================================================
+// SUPABASE INIT
+// ============================================================
+const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+
+let session = null;
+let profile = null;
+let todayContent = { sunnah:null, hadith:null, dua:null, verse:null, challenge:null };
+let bookmarksCache = [];
+let completionToday = {};
+let streakInfo = { current_streak:0, longest_streak:0 };
+let statsInfo = { sunnahs_completed:0, hadiths_read:0, verses_read:0, challenges_completed:0, duas_recited:0 };
+let historyCache = {}; // date -> completion row
+let localTheme = 'light';
+
+function todayKey(){ return new Date().toISOString().slice(0,10); }
+function setSyncStatus(ok){
+  document.getElementById('syncDot').classList.toggle('offline', !ok);
+  document.getElementById('syncText').textContent = ok ? 'Synced' : 'Offline';
+}
+
+// ============================================================
+// AUTH FLOWS
+// ============================================================
+function showAuthError(msg){
+  const el = document.getElementById('authError');
+  el.textContent = msg; el.style.display = 'block';
+}
+async function handleAuth(mode){
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if(!email || !password){ showAuthError('Please enter email and password.'); return; }
+  document.getElementById('authError').style.display='none';
+  try{
+    let result;
+    if(mode === 'signup'){
+      result = await sb.auth.signUp({ email, password });
+    } else {
+      result = await sb.auth.signInWithPassword({ email, password });
+    }
+    if(result.error) throw result.error;
+    if(mode==='signup' && !result.data.session){
+      showAuthError('Check your email to confirm your account, then sign in.');
+      return;
+    }
+    await onAuthReady(result.data.session);
+  }catch(e){
+    showAuthError(e.message || 'Authentication failed.');
+  }
+}
+async function signInWithProvider(provider){
+  try{
+    const { error } = await sb.auth.signInWithOAuth({ provider, options:{ redirectTo: window.location.href } });
+    if(error) throw error;
+  }catch(e){
+    showAuthError(provider + ' sign-in not fully configured yet in this Supabase project: ' + e.message);
+  }
+}
+async function continueAsGuest(){
+  try{
+    const { data, error } = await sb.auth.signInAnonymously();
+    if(error) throw error;
+    await onAuthReady(data.session);
+  }catch(e){
+    showAuthError('Guest mode failed: ' + e.message + ' (enable Anonymous Sign-ins in Supabase Auth settings)');
+  }
+}
+async function signOutUser(){
+  await sb.auth.signOut();
+  location.reload();
+}
+
+async function onAuthReady(sess){
+  session = sess;
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('bottomNav').style.display = 'flex';
+  await loadProfile();
+  await loadTodayContent();
+  await loadUserData();
+  renderAll();
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+async function loadProfile(){
+  const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+  if(error){ console.warn('profile load error', error.message); return; }
+  profile = data;
+  localTheme = profile.theme || 'light';
+  document.body.setAttribute('data-theme', localTheme);
+  document.getElementById('darkToggle').checked = localTheme === 'dark';
+  document.getElementById('reminderTime').value = profile.notification_time?.slice(0,5) || '06:00';
+  document.getElementById('acctEmail').textContent = session.user.email || 'Guest User';
+  document.getElementById('acctStatus').textContent = profile.is_guest ? 'Anonymous guest session (no cloud backup of email)' : 'Signed in — synced across devices';
+  if(profile.is_admin) document.getElementById('adminEntryCard').style.display = 'block';
+}
+
+// ============================================================
+// CONTENT LOADING (today's items — simplest: latest row per table)
+// ============================================================
+async function loadTodayContent(){
+  const today = todayKey();
+  const fetchOne = async (table) => {
+    let { data } = await sb.from(table).select('*').eq('active_date', today).limit(1);
+    if(!data || data.length===0){
+      const res = await sb.from(table).select('*').order('created_at', {ascending:false}).limit(1);
+      data = res.data;
+    }
+    return (data && data[0]) || null;
+  };
+  const [sunnah, hadith, dua, verse, challenge] = await Promise.all([
+    fetchOne('sunnahs'), fetchOne('hadiths'), fetchOne('duas'), fetchOne('quran_verses'), fetchOne('challenges')
+  ]);
+  todayContent = { sunnah, hadith, dua, verse, challenge };
+  renderContentCards();
+}
+
+function renderContentCards(){
+  const s = todayContent.sunnah;
+  document.getElementById('cardSunnah').innerHTML = s ? `
+    <span class="card-tag">✨ Sunnah of the Day</span>
+    <div class="card-title">${escapeHtml(s.title)}</div>
+    <div class="card-body">${escapeHtml(s.explanation)}</div>
+    <div class="card-sub"><strong>Apply it today:</strong> ${escapeHtml(s.practical_tip)}</div>
+    <div class="ref">${escapeHtml(s.reference)}</div>
+    <div class="card-footer">
+      <div class="action-row">
+        <button class="action-btn" id="bm-sunnah" onclick="toggleBookmark('sunnah','${s.id}','${escJs(s.title)}')">🔖</button>
+        <button class="action-btn" onclick="shareContent('${escJs(s.title + ' — ' + s.reference)}')">📤</button>
+      </div>
+      <button class="complete-btn" id="done-sunnah" onclick="markDone('sunnah')">✓ Mark Complete</button>
+    </div>` : `<div class="card-sub">No content available yet.</div>`;
+
+  const h = todayContent.hadith;
+  document.getElementById('cardHadith').innerHTML = h ? `
+    <span class="card-tag">📖 Hadith</span>
+    ${h.arabic_text ? `<div class="arabic">${h.arabic_text}</div>` : ''}
+    <div class="card-body">"${escapeHtml(h.translation)}"</div>
+    <div class="meta-row">
+      ${h.narrator ? `<span class="meta-chip">Narrator: ${escapeHtml(h.narrator)}</span>` : ''}
+      <span class="meta-chip">${escapeHtml(h.collection)}${h.hadith_number ? ' ' + escapeHtml(h.hadith_number) : ''}</span>
+    </div>
+    ${h.explanation ? `<div class="card-sub">${escapeHtml(h.explanation)}</div>` : ''}
+    <div class="card-footer">
+      <div class="action-row">
+        <button class="action-btn" id="bm-hadith" onclick="toggleBookmark('hadith','${h.id}','${escJs(h.translation.slice(0,40))}')">🔖</button>
+        <button class="action-btn" onclick="copyContent('${escJs(h.translation + ' — ' + h.collection)}')">📋</button>
+        <button class="action-btn" onclick="speakText('${escJs(h.translation)}')">🔊</button>
+      </div>
+      <button class="complete-btn" id="done-hadith" onclick="markDone('hadith')">✓ Read</button>
+    </div>` : `<div class="card-sub">No content available yet.</div>`;
+
+  const d = todayContent.dua;
+  document.getElementById('cardDua').innerHTML = d ? `
+    <span class="card-tag gold">🤲 Dua</span>
+    <div class="arabic">${d.arabic_text}</div>
+    ${d.transliteration ? `<div class="translit">${escapeHtml(d.transliteration)}</div>` : ''}
+    <div class="card-body"><strong>Translation:</strong> ${escapeHtml(d.translation)}</div>
+    ${d.situations ? `<div class="card-sub"><strong>When to recite:</strong> ${escapeHtml(d.situations)}</div>` : ''}
+    <div class="card-footer">
+      <div class="action-row">
+        <button class="action-btn" id="bm-dua" onclick="toggleBookmark('dua','${d.id}','${escJs(d.translation.slice(0,40))}')">🔖</button>
+        <button class="action-btn" onclick="speakText('${escJs(d.translation)}')">🔊</button>
+      </div>
+      <button class="complete-btn" id="done-dua" onclick="markDone('dua')">✓ Recited</button>
+    </div>` : `<div class="card-sub">No content available yet.</div>`;
+
+  const v = todayContent.verse;
+  document.getElementById('cardVerse').innerHTML = v ? `
+    <span class="card-tag">📗 Qur'an</span>
+    <div class="arabic">${v.arabic_text}</div>
+    <div class="card-body">"${escapeHtml(v.translation)}"</div>
+    <div class="meta-row"><span class="meta-chip">Surah ${escapeHtml(v.surah_name)} (${escapeHtml(v.verse_number)})</span></div>
+    ${v.reflection ? `<div class="card-sub"><strong>Reflection:</strong> ${escapeHtml(v.reflection)}</div>` : ''}
+    <div class="card-footer">
+      <div class="action-row">
+        <button class="action-btn" id="bm-verse" onclick="toggleBookmark('verse','${v.id}','${escJs(v.surah_name+' '+v.verse_number)}')">🔖</button>
+        <button class="action-btn" onclick="speakText('${escJs(v.translation)}')">🔊</button>
+      </div>
+      <button class="complete-btn" id="done-verse" onclick="markDone('verse')">✓ Read</button>
+    </div>` : `<div class="card-sub">No content available yet.</div>`;
+
+  const c = todayContent.challenge;
+  document.getElementById('cardChallenge').innerHTML = c ? `
+    <span class="card-tag gold">🎯 2-Minute Challenge</span>
+    <div class="card-title">${escapeHtml(c.title)}</div>
+    ${c.description ? `<div class="card-sub">${escapeHtml(c.description)}</div>` : ''}
+    <div class="card-footer">
+      <div></div>
+      <button class="complete-btn" id="done-challenge" onclick="markDone('challenge')">✓ I Did It</button>
+    </div>` : `<div class="card-sub">No challenge set yet.</div>`;
+
+  applyCompletionState();
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function escJs(s){ return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+
+// ============================================================
+// USER DATA (bookmarks, completions, streaks, stats)
+// ============================================================
+async function loadUserData(){
+  const uid = session.user.id;
+  const today = todayKey();
+
+  const [{data:bm}, {data:comp}, {data:streak}, {data:stats}, {data:hist}] = await Promise.all([
+    sb.from('bookmarks').select('*').eq('user_id', uid),
+    sb.from('daily_completions').select('*').eq('user_id', uid).eq('completion_date', today).maybeSingle(),
+    sb.from('streaks').select('*').eq('user_id', uid).maybeSingle(),
+    sb.from('lifetime_stats').select('*').eq('user_id', uid).maybeSingle(),
+    sb.from('daily_completions').select('*').eq('user_id', uid)
+  ]);
+
+  bookmarksCache = bm || [];
+  completionToday = comp || {};
+  streakInfo = streak || { current_streak:0, longest_streak:0 };
+  statsInfo = stats || { sunnahs_completed:0, hadiths_read:0, verses_read:0, challenges_completed:0, duas_recited:0 };
+  historyCache = {};
+  (hist||[]).forEach(r=> historyCache[r.completion_date] = r);
+
+  if(!streak){ await sb.from('streaks').upsert({ user_id: uid, current_streak:0, longest_streak:0 }); }
+  if(!stats){ await sb.from('lifetime_stats').upsert({ user_id: uid }); }
+
+  setSyncStatus(true);
+}
+
+function applyCompletionState(){
+  const map = { sunnah:'sunnah_done', hadith:'hadith_done', dua:'dua_done', verse:'verse_done', challenge:'challenge_done' };
+  Object.keys(map).forEach(t=>{
+    const btn = document.getElementById('done-'+t);
+    if(btn && completionToday[map[t]]){
+      btn.classList.add('done');
+      btn.textContent = t==='challenge' ? '✓ Completed' : '✓ Done';
+    }
+  });
+  ['sunnah','hadith','dua','verse'].forEach(t=>{
+    const id = todayContent[t]?.id;
+    const btn = document.getElementById('bm-'+t);
+    if(btn && id && bookmarksCache.find(b=>b.content_type===t && b.content_id===id)) btn.classList.add('active');
+  });
+}
+
+async function markDone(type){
+  const uid = session.user.id;
+  const today = todayKey();
+  const fieldMap = { sunnah:'sunnah_done', hadith:'hadith_done', dua:'dua_done', verse:'verse_done', challenge:'challenge_done' };
+  const statMap = { sunnah:'sunnahs_completed', hadith:'hadiths_read', dua:'duas_recited', verse:'verses_read', challenge:'challenges_completed' };
+  const field = fieldMap[type];
+  if(completionToday[field]){ showToast('Already marked today ✓'); return; }
+
+  completionToday[field] = true;
+  const btn = document.getElementById('done-'+type);
+  btn.classList.add('done');
+  btn.textContent = type==='challenge' ? '✓ Completed' : '✓ Done';
+
+  try{
+    const { data, error } = await sb.from('daily_completions')
+      .upsert({ user_id: uid, completion_date: today, ...completionToday }, { onConflict: 'user_id,completion_date' })
+      .select().single();
+    if(error) throw error;
+    completionToday = data;
+    historyCache[today] = data;
+
+    statsInfo[statMap[type]] = (statsInfo[statMap[type]] || 0) + 1;
+    await sb.from('lifetime_stats').upsert({ user_id: uid, ...statsInfo });
+
+    setSyncStatus(true);
+    renderStats();
+    updateHeaderProgress();
+    await checkFullCompletion();
+  }catch(e){
+    setSyncStatus(false);
+    showToast('Saved locally — will sync when online');
+  }
+}
+
+async function checkFullCompletion(){
+  const today = todayKey();
+  const c = completionToday;
+  const done = ['sunnah_done','hadith_done','dua_done','verse_done','challenge_done'].filter(k=>c[k]).length;
+  if(done === 5){
+    const uid = session.user.id;
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    const yData = historyCache[yesterday];
+    const yDone = yData ? ['sunnah_done','hadith_done','dua_done','verse_done','challenge_done'].filter(k=>yData[k]).length : 0;
+
+    if(streakInfo.last_completed_date !== today){
+      streakInfo.current_streak = (yDone >= 5) ? (streakInfo.current_streak||0) + 1 : 1;
+      streakInfo.longest_streak = Math.max(streakInfo.longest_streak||0, streakInfo.current_streak);
+      streakInfo.last_completed_date = today;
+      await sb.from('streaks').upsert({ user_id: uid, ...streakInfo });
+      updateHeaderProgress();
+      celebrate();
+    }
+  }
+}
+
+function celebrate(){
+  const overlay = document.getElementById('celebrateOverlay');
+  const milestones = [7,30,100,365];
+  if(milestones.includes(streakInfo.current_streak)){
+    document.getElementById('celebrateTitle').textContent = `🏆 ${streakInfo.current_streak}-Day Milestone!`;
+    document.getElementById('celebrateSub').textContent = 'SubhanAllah! Your consistency is a beautiful act of worship.';
+  } else {
+    document.getElementById('celebrateTitle').textContent = 'MashaAllah!';
+    document.getElementById('celebrateSub').textContent = `You completed today's 2-minute session. Streak: ${streakInfo.current_streak} days 🔥`;
+  }
+  overlay.classList.add('show');
+  setTimeout(()=>overlay.classList.remove('show'), 2400);
+}
+
+async function toggleBookmark(type, contentId, label){
+  const uid = session.user.id;
+  const btn = document.getElementById('bm-'+type);
+  const existing = bookmarksCache.find(b=>b.content_type===type && b.content_id===contentId);
+  try{
+    if(existing){
+      await sb.from('bookmarks').delete().eq('id', existing.id);
+      bookmarksCache = bookmarksCache.filter(b=>b.id!==existing.id);
+      btn.classList.remove('active');
+      showToast('Removed from bookmarks');
+    } else {
+      const { data, error } = await sb.from('bookmarks').insert({ user_id: uid, content_type: type, content_id: contentId, label }).select().single();
+      if(error) throw error;
+      bookmarksCache.push(data);
+      btn.classList.add('active');
+      showToast('Saved to bookmarks 🔖');
+    }
+    renderBookmarks();
+  }catch(e){ showToast('Bookmark sync failed'); }
+}
+
+function renderBookmarks(){
+  const q = (document.getElementById('bmSearch')?.value||'').toLowerCase();
+  const list = document.getElementById('bookmarksList');
+  const filtered = bookmarksCache.filter(b=>(b.label||'').toLowerCase().includes(q));
+  if(filtered.length===0){
+    list.innerHTML = '<div class="card card-sub" style="text-align:center;">No bookmarks yet. Tap 🔖 on any card to save it here.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(b=>`
+    <div class="card fade-in">
+      <span class="card-tag">${b.content_type.toUpperCase()}</span>
+      <div class="card-title" style="font-size:15px;">${escapeHtml(b.label||'')}</div>
+      <div class="card-sub">Saved on ${new Date(b.created_at).toLocaleDateString()}</div>
+    </div>`).join('');
+}
+
+function renderStats(){
+  document.getElementById('statSunnah').textContent = statsInfo.sunnahs_completed||0;
+  document.getElementById('statHadith').textContent = statsInfo.hadiths_read||0;
+  document.getElementById('statVerse').textContent = statsInfo.verses_read||0;
+  document.getElementById('statChallenge').textContent = statsInfo.challenges_completed||0;
+  document.getElementById('curStreak').textContent = streakInfo.current_streak||0;
+  document.getElementById('longStreak').textContent = streakInfo.longest_streak||0;
+}
+
+function renderCalendar(){
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">';
+  for(let d=1; d<=daysInMonth; d++){
+    const key = new Date(year,month,d).toISOString().slice(0,10);
+    const row = historyCache[key];
+    const completed = row && ['sunnah_done','hadith_done','dua_done','verse_done','challenge_done'].filter(k=>row[k]).length >= 5;
+    html += `<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:11px;
+      background:${completed?'var(--green)':'var(--bg)'};color:${completed?'#fff':'var(--muted)'};">${d}</div>`;
+  }
+  html += '</div>';
+  document.getElementById('calendarCard').innerHTML = html;
+}
+
+function updateHeaderProgress(){
+  const c = completionToday;
+  const total = 5;
+  const done = ['sunnah_done','hadith_done','dua_done','verse_done','challenge_done'].filter(k=>c[k]).length;
+  const pct = Math.round((done/total)*100);
+  document.getElementById('progressPct').textContent = pct+'%';
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('streakNum').textContent = (streakInfo.current_streak||0) + ' days';
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+async function setTheme(dark){
+  localTheme = dark ? 'dark' : 'light';
+  document.body.setAttribute('data-theme', localTheme);
+  document.getElementById('darkToggle').checked = dark;
+  if(session) await sb.from('profiles').update({ theme: localTheme }).eq('id', session.user.id);
+}
+function toggleTheme(){ setTheme(document.body.getAttribute('data-theme') !== 'dark'); }
+
+async function updateNotificationTime(val){
+  if(session) await sb.from('profiles').update({ notification_time: val }).eq('id', session.user.id);
+  showToast('Reminder time updated to ' + val);
+}
+
+async function resetProgress(){
+  if(!confirm('Reset all progress? This cannot be undone.')) return;
+  const uid = session.user.id;
+  await Promise.all([
+    sb.from('daily_completions').delete().eq('user_id', uid),
+    sb.from('streaks').upsert({ user_id: uid, current_streak:0, longest_streak:0, last_completed_date:null }),
+    sb.from('lifetime_stats').upsert({ user_id: uid, sunnahs_completed:0, hadiths_read:0, verses_read:0, challenges_completed:0, duas_recited:0 }),
+    sb.from('bookmarks').delete().eq('user_id', uid)
+  ]);
+  await loadUserData();
+  renderAll();
+  showToast('Progress reset');
+}
+
+// ============================================================
+// SCREEN NAV
+// ============================================================
+function showScreen(name, el){
+  ['home','bookmarks','progress','settings','account','admin'].forEach(s=>{
+    const scr = document.getElementById(s+'Screen');
+    if(scr) scr.style.display = s===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el && el.classList) el.classList.add('active');
+  if(name==='progress'){ renderStats(); renderCalendar(); }
+  if(name==='bookmarks'){ renderBookmarks(); }
+  if(name==='admin'){ switchAdminTab('sunnahs', document.querySelector('.admin-tab')); }
+}
+
+function renderAll(){
+  renderDates();
+  renderContentCards();
+  renderStats();
+  renderBookmarks();
+  renderCalendar();
+  updateHeaderProgress();
+}
+
+function renderDates(){
+  const now = new Date();
+  const greg = now.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  document.getElementById('gregDate').textContent = greg;
+  document.getElementById('hijriDate').textContent = toHijri(now);
+  const hour = now.getHours();
+  document.getElementById('greetingText').textContent =
+    hour < 12 ? 'Assalamu Alaikum ☾ Good Morning' : hour < 18 ? 'Assalamu Alaikum ☾ Good Afternoon' : 'Assalamu Alaikum ☾ Good Evening';
+}
+function toHijri(date){
+  try{ return new Intl.DateTimeFormat('en-TN-u-ca-islamic', {day:'numeric', month:'long', year:'numeric'}).format(date) + ' AH'; }
+  catch(e){ return 'Hijri date unavailable'; }
+}
+
+// ============================================================
+// ADMIN CMS
+// ============================================================
+const ADMIN_SCHEMAS = {
+  sunnahs: [['title','Title'],['explanation','Explanation'],['practical_tip','Practical Tip'],['reference','Reference']],
+  hadiths: [['arabic_text','Arabic Text'],['translation','Translation'],['narrator','Narrator'],['collection','Collection'],['hadith_number','Hadith Number'],['explanation','Explanation']],
+  duas: [['arabic_text','Arabic Text'],['transliteration','Transliteration'],['translation','Translation'],['benefits','Benefits'],['situations','Situations']],
+  quran_verses: [['arabic_text','Arabic Text'],['translation','Translation'],['surah_name','Surah Name'],['verse_number','Verse Number'],['reflection','Reflection']],
+  challenges: [['title','Title'],['description','Description']]
+};
+let currentAdminTable = 'sunnahs';
+
+function switchAdminTab(table, el){
+  currentAdminTable = table;
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderAdminForm();
+  loadAdminList();
+}
+
+function renderAdminForm(){
+  const fields = ADMIN_SCHEMAS[currentAdminTable];
+  const card = document.getElementById('adminFormCard');
+  card.innerHTML = fields.map(([key,label])=>
+    (key.includes('text')||key.includes('explanation')||key.includes('translation')||key.includes('description')||key.includes('benefits')||key.includes('situations')||key.includes('reflection')||key.includes('tip'))
+      ? `<textarea id="admin_${key}" placeholder="${label}"></textarea>`
+      : `<input id="admin_${key}" placeholder="${label}">`
+  ).join('') + `
+    <input id="admin_active_date" type="date" placeholder="Active date (optional)">
+    <button class="complete-btn" onclick="submitAdminEntry()">➕ Add Entry</button>`;
+}
+
+async function submitAdminEntry(){
+  const fields = ADMIN_SCHEMAS[currentAdminTable];
+  const payload = {};
+  fields.forEach(([key])=>{ payload[key] = document.getElementById('admin_'+key).value; });
+  const activeDate = document.getElementById('admin_active_date').value;
+  if(activeDate) payload.active_date = activeDate;
+  payload.created_by = session.user.id;
+
+  const { error } = await sb.from(currentAdminTable).insert(payload);
+  if(error){ showToast('Error: ' + error.message); return; }
+  showToast('Entry added ✓');
+  renderAdminForm();
+  loadAdminList();
+  loadTodayContent();
+}
+
+async function loadAdminList(){
+  const { data, error } = await sb.from(currentAdminTable).select('*').order('created_at', {ascending:false}).limit(20);
+  const listEl = document.getElementById('adminList');
+  if(error){ listEl.innerHTML = `<div class="card card-sub">Error: ${error.message}</div>`; return; }
+  if(!data || data.length===0){ listEl.innerHTML = '<div class="card card-sub">No entries yet.</div>'; return; }
+  const titleKey = data[0].title ? 'title' : (data[0].translation ? 'translation' : 'arabic_text');
+  listEl.innerHTML = data.map(row=>`
+    <div class="card">
+      <div class="card-title" style="font-size:14px;">${escapeHtml((row[titleKey]||'').slice(0,80))}</div>
+      <div class="card-sub">${row.active_date ? 'Scheduled: '+row.active_date : 'No fixed date (rotates)'}</div>
+      <div class="card-footer"><div></div><button class="complete-btn" onclick="deleteAdminEntry('${row.id}')">🗑️ Delete</button></div>
+    </div>`).join('');
+}
+
+async function deleteAdminEntry(id){
+  if(!confirm('Delete this entry?')) return;
+  await sb.from(currentAdminTable).delete().eq('id', id);
+  loadAdminList();
+  loadTodayContent();
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function shareContent(text){
+  if(navigator.share){ navigator.share({text}); } else { copyContent(text); }
+}
+function copyContent(text){
+  navigator.clipboard?.writeText(text);
+  showToast('Copied to clipboard 📋');
+}
+function speakText(text){
+  if('speechSynthesis' in window){
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.9;
+    speechSynthesis.speak(u);
+  } else { showToast('Text-to-speech not supported'); }
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+(async function boot(){
+  const { data: { session: existing } } = await sb.auth.getSession();
+  if(existing){ await onAuthReady(existing); }
+  sb.auth.onAuthStateChange((event, sess)=>{
+    if(event === 'SIGNED_IN' && !session){ onAuthReady(sess); }
+  });
+})();
+</script>
+</body>
+</html>
